@@ -141,7 +141,7 @@ public:
   using TBase::GetExtent;
   using TBase::GetStride;
 
-  template <typename U>
+  template <typename U, bool Reversed = false>
   class SliceIterator
     : public NSliceImpl::SliceBase<T, extent, stride> {
   public:
@@ -155,7 +155,8 @@ public:
     using value_type = std::remove_cv_t<U>;
     using pointer = U*;
     using reference = U&;
-    using difference_type = difference_type;
+    using const_reference = std::remove_cv_t<U>&;
+    using difference_type = int32_t;
 
     SliceIterator() : TBase(0, 1) {}
 
@@ -176,44 +177,47 @@ public:
       return ptr_ + offset_;
     }
     SliceIterator& operator++() {
-      offset_ += GetStride();
+      offset_ += Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
       return *this;
     }
     SliceIterator& operator--() {
-      offset_ -= GetStride();
+      offset_ -= Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
       return *this;
     }
     SliceIterator operator++(int) {
       SliceIterator res(ptr_, offset_);
-      offset_ += GetStride();
+      offset_ += Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
       return res;
     }
     SliceIterator operator--(int) {
       SliceIterator res(ptr_, offset_);
-      offset_ -= GetStride();
+      offset_ -= Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
       return res;
     }
     SliceIterator& operator+=(difference_type n) {
-      offset_ += n * GetStride();
+      offset_ += n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride());
       return *this;
     }
     friend SliceIterator operator+(SliceIterator iter, difference_type n) {
-      return SliceIterator(iter.ptr_, iter.offset_) += n;
+      return SliceIterator(iter.ptr_, iter.offset_) += Reversed ? -n : n;
     }
     friend SliceIterator operator+(difference_type n, SliceIterator iter) {
-      return SliceIterator(iter.ptr_, iter.offset_) -= n;
+      return SliceIterator(iter.ptr_, iter.offset_) -= Reversed ? -n : n;
     }
     friend SliceIterator operator-(SliceIterator iter, difference_type n) {
-      return SliceIterator(iter.ptr_, iter.offset_) += n;
+      return SliceIterator(iter.ptr_, iter.offset_) += Reversed ? -n : n;
     }
     friend SliceIterator operator-(difference_type n, SliceIterator iter) {
-      return SliceIterator(iter.ptr_, iter.offset_) -= n;
+      return SliceIterator(iter.ptr_, iter.offset_) -= Reversed ? -n : n;
     }
     SliceIterator& operator-=(difference_type n) {
-      offset_ -= n * GetStride();
+      offset_ -= n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride());
     }
-    reference operator[](const difference_type& n) const {
-      return ptr_ + offset_ + n * GetStride();
+    reference operator[](difference_type n) {
+      return *(ptr_ + offset_ + n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride()));
+    }
+    const_reference operator[](difference_type n) const {
+      return *(ptr_ + offset_ + n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride()));
     }
     bool operator==(const SliceIterator& other) const {
         return offset_ == other.offset_;
@@ -253,6 +257,8 @@ public:
 
   using iterator = SliceIterator<T>;
   using const_iterator = SliceIterator<const T>;
+  using reverse_iterator = SliceIterator<T, true>;
+  using const_reverse_iterator = SliceIterator<const T, true>;
 
   iterator begin() {
     return iterator(data_, 0);
@@ -268,6 +274,22 @@ public:
 
   const_iterator end() const {
     return const_iterator(data_, GetStride() * GetExtent());
+  }
+
+  reverse_iterator rbegin() {
+    return reverse_iterator(data_, GetStride() * (GetExtent() - 1));
+  }
+
+  reverse_iterator rend() {
+    return reverse_iterator(data_, -static_cast<int32_t>(GetStride()));
+  }
+
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(data_, GetStride() * (GetExtent() - 1));
+  }
+
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(data_, -static_cast<int32_t>(GetStride()));
   }
 
   const_iterator cbegin() const {
