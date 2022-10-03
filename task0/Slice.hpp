@@ -311,9 +311,17 @@ public:
   const_pointer Data() const {
     return GetData();
   }
-  template<BasicContainer U> requires (stride != dynamic_stride) &&
-                                      std::is_same_v<T, typename U::value_type>
-  explicit constexpr Slice(U& container) noexcept
+  // template<BasicContainer U> requires (stride != dynamic_stride)
+  // explicit constexpr Slice(U& container) noexcept
+  //     : data_(container.data())
+  //     , TBase((container.size() - 1) / stride + 1, stride)
+  // {
+  // }
+
+  template <template <class> class Container, class U>
+  requires BasicContainer<Container<U>> &&
+           (stride != dynamic_stride)
+  Slice(Container<U>& container) noexcept
       : data_(container.data())
       , TBase((container.size() - 1) / stride + 1, stride)
   {
