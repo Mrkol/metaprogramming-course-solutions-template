@@ -318,11 +318,12 @@ public:
   {
   }
 
-  template <std::contiguous_iterator It> requires (stride != dynamic_stride)
+  template <std::contiguous_iterator It> requires (stride == dynamic_stride)
   Slice(It first, std::size_t count, std::ptrdiff_t skip)
       : TBase(count, stride)
       , data_(std::to_address(first))
   {
+    SetStride(skip);
   }
 
   template <typename U, std::size_t other_extent, std::ptrdiff_t other_stride>
@@ -331,7 +332,8 @@ public:
              stride == dynamic_stride ||
              stride == other_stride))
   constexpr  Slice(Slice<U, other_extent, other_stride> other)
-      : TBase(other_extent, other_stride) {
+      : TBase(other_extent, other_stride)
+  {
     SetData(other.Data());
     SetExtentIfDynamic(other.GetExtent());
     SetStrideIfDynamic(other.GetStride());
