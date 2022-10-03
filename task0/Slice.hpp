@@ -141,7 +141,7 @@ public:
   using TBase::GetExtent;
   using TBase::GetStride;
 
-  template <typename U, bool Reversed = false>
+  template <typename U>
   class SliceIterator
     : public NSliceImpl::SliceBase<T, extent, stride> {
   public:
@@ -177,47 +177,47 @@ public:
       return ptr_ + offset_;
     }
     SliceIterator& operator++() {
-      offset_ += Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
+      offset_ += Stride();
       return *this;
     }
     SliceIterator& operator--() {
-      offset_ -= Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
+      offset_ -= Stride();
       return *this;
     }
     SliceIterator operator++(int) {
       SliceIterator res(ptr_, offset_);
-      offset_ += Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
+      offset_ += Stride();
       return res;
     }
     SliceIterator operator--(int) {
       SliceIterator res(ptr_, offset_);
-      offset_ -= Reversed ? -static_cast<int32_t>(GetStride()) : GetStride();
+      offset_ -= Stride();
       return res;
     }
     SliceIterator& operator+=(difference_type n) {
-      offset_ += n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride());
+      offset_ += n * Stride();
       return *this;
     }
     friend SliceIterator operator+(SliceIterator iter, difference_type n) {
-      return SliceIterator(iter.ptr_, iter.offset_) += Reversed ? -n : n;
+      return SliceIterator(iter.ptr_, iter.offset_) += n;
     }
     friend SliceIterator operator+(difference_type n, SliceIterator iter) {
-      return SliceIterator(iter.ptr_, iter.offset_) -= Reversed ? -n : n;
+      return SliceIterator(iter.ptr_, iter.offset_) -= n;
     }
     friend SliceIterator operator-(SliceIterator iter, difference_type n) {
-      return SliceIterator(iter.ptr_, iter.offset_) += Reversed ? -n : n;
+      return SliceIterator(iter.ptr_, iter.offset_) += n;
     }
     friend SliceIterator operator-(difference_type n, SliceIterator iter) {
-      return SliceIterator(iter.ptr_, iter.offset_) -= Reversed ? -n : n;
+      return SliceIterator(iter.ptr_, iter.offset_) -= n;
     }
     SliceIterator& operator-=(difference_type n) {
-      offset_ -= n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride());
+      offset_ -= n * Stride();
     }
     reference operator[](difference_type n) {
-      return *(ptr_ + offset_ + n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride()));
+      return *(ptr_ + offset_ + n * Stride());
     }
     const_reference operator[](difference_type n) const {
-      return *(ptr_ + offset_ + n * (Reversed ? -static_cast<int32_t>(GetStride()) : GetStride()));
+      return *(ptr_ + offset_ + n * Stride());
     }
     bool operator==(const SliceIterator& other) const {
         return offset_ == other.offset_;
@@ -257,8 +257,8 @@ public:
 
   using iterator = SliceIterator<T>;
   using const_iterator = SliceIterator<const T>;
-  using reverse_iterator = SliceIterator<T, true>;
-  using const_reverse_iterator = SliceIterator<const T, true>;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   iterator begin() {
     return iterator(data_, 0);
@@ -277,19 +277,19 @@ public:
   }
 
   reverse_iterator rbegin() {
-    return reverse_iterator(data_, GetStride() * (GetExtent() - 1));
+    return reverse_iterator(end());
   }
 
   reverse_iterator rend() {
-    return reverse_iterator(data_, -static_cast<int32_t>(GetStride()));
+    return reverse_iterator(begin());
   }
 
   const_reverse_iterator rbegin() const {
-    return const_reverse_iterator(data_, GetStride() * (GetExtent() - 1));
+    return const_reverse_iterator(end());
   }
 
   const_reverse_iterator rend() const {
-    return const_reverse_iterator(data_, -static_cast<int32_t>(GetStride()));
+    return const_reverse_iterator(begin());
   }
 
   const_iterator cbegin() const {
@@ -311,8 +311,9 @@ public:
   const_pointer Data() const {
     return GetData();
   }
-  template<BasicContainer U> requires (stride != dynamic_stride)
-  constexpr Slice(U& container)
+  template<BasicContainer U> requires (stride != dynamic_stride) &&
+                                      std::is_same_v<T, typename U::value_type>
+  explicit constexpr Slice(U& container) noexcept
       : data_(container.data())
       , TBase((container.size() - 1) / stride + 1, stride)
   {
@@ -489,10 +490,6 @@ public:
     return *this;
   }
 };
-
-static_assert();
-
-// static_assert(std::random_access_iterator<Slice<int, 2, 3>::iterator>);
 
 // int main() {
 //   std::vector<int> a{};
