@@ -499,6 +499,9 @@ public:
   }
 };
 
+template <BasicContainer Container>
+Slice(Container& container) -> Slice<Container>;
+
 // int main() {
 //   std::vector<int> a{};
 //   for (size_t i = 0; i < 100; ++i) {
