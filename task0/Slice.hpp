@@ -343,11 +343,20 @@ public:
   }
 
   constexpr size_type Size() const noexcept {
-    // return GetExtent();
     if constexpr (extent == std::dynamic_extent) {
       return GetExtent();
     }
     return extent;
+  }
+
+  constexpr bool operator==(const Slice& other) const noexcept {
+    return GetExtent() == other.GetExtent() &&
+           GetStride() == other.GetStride() &&
+           GetData() == other.GetData();
+  }
+
+  constexpr bool operator!=(const Slice& other) const noexcept {
+    return !(*this == other);
   }
 
   Slice<T, std::dynamic_extent, stride>
