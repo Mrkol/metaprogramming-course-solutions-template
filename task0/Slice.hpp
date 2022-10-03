@@ -318,10 +318,10 @@ public:
   // {
   // }
 
-  template <template <class> class Container, class U>
-  requires BasicContainer<Container<U>> &&
+  template <template <class> class Container>
+  requires BasicContainer<Container<T>> &&
            (stride != dynamic_stride)
-  Slice(Container<U>& container) noexcept
+  Slice(Container<T>& container) noexcept
       : data_(container.data())
       , TBase((container.size() - 1) / stride + 1, stride)
   {
