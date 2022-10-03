@@ -330,7 +330,8 @@ public:
              extent == other_extent) && (
              stride == dynamic_stride ||
              stride == other_stride))
-  constexpr  Slice(Slice<U, other_extent, other_stride> other) {
+  constexpr  Slice(Slice<U, other_extent, other_stride> other)
+      : TBase(other_extent, other_stride) {
     SetData(other.Data());
     SetExtentIfDynamic(other.GetExtent());
     SetStrideIfDynamic(other.GetStride());
