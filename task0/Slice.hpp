@@ -313,15 +313,15 @@ public:
   }
   template<BasicContainer U> requires (stride != dynamic_stride)
   constexpr Slice(U& container) noexcept
-      : data_(container.data())
-      , TBase((container.size() - 1) / stride + 1, stride)
+      : TBase((container.size() - 1) / stride + 1, stride)
+      , data_(container.data())
   {
   }
 
   template <std::contiguous_iterator It> requires (stride != dynamic_stride)
   Slice(It first, std::size_t count, std::ptrdiff_t skip)
-      : data_(std::to_address(first))
-      , TBase(count, stride)
+      : TBase(count, stride)
+      , data_(std::to_address(first))
   {
   }
 
@@ -330,7 +330,7 @@ public:
              extent == other_extent) && (
              stride == dynamic_stride ||
              stride == other_stride))
-  Slice(Slice<U, other_extent, other_stride> other) {
+  constexpr  Slice(Slice<U, other_extent, other_stride> other) {
     SetData(other.data_);
     SetExtentIfDynamic(other.GetExtent());
     SetStrideIfDynamic(other.GetStride());
@@ -480,18 +480,21 @@ public:
   constexpr Slice() noexcept
       : TBase(GetExtent(), GetStride()) {};
 
-  pointer GetData() const noexcept {
+  constexpr pointer GetData() const noexcept {
     return data_;
   }
 
-  Slice& SetData(T* data) noexcept {
+  constexpr Slice& SetData(T* data) noexcept {
     data_ = data;
     return *this;
   }
 };
 
 template <BasicContainer Container>
-Slice(Container& container) -> Slice<typename Container::value_type>;
+Slice(Container&) -> Slice<typename Container::value_type>;
+
+template <typename T, size_t N>
+Slice(std::array<T, N>&) -> Slice<T, N>;
 
 // int main() {
 //   std::vector<int> a{};
