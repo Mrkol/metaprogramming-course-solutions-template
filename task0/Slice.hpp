@@ -296,10 +296,7 @@ public:
   const_iterator cend() const {
     return const_iterator(data_, GetStride() * GetExtent());
   }
-  reference operator[](size_type idx) {
-    return *(data_ + GetStride() * idx);
-  }
-  const_reference operator[](size_t idx) const {
+  reference operator[](size_type idx) const {
     return *(data_ + GetStride() * idx);
   }
   pointer Data() {
