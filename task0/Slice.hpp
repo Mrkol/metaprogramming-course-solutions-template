@@ -1,17 +1,11 @@
-#include <bits/iterator_concepts.h>
 #include <cstddef>
+#include <cstdio>
 #include <memory>
 #include <span>
 #include <concepts>
 #include <cstdlib>
 #include <array>
 #include <iterator>
-
-// remove
-#include <type_traits>
-#include <vector>
-#include <iostream>
-// ----
 
 inline constexpr std::ptrdiff_t dynamic_stride = -1;
 
@@ -158,6 +152,9 @@ public:
     using const_reference = std::remove_cv_t<U>&;
     using difference_type = int32_t;
 
+    auto Data() { return ptr_ + offset_; }
+    auto Stride() { return GetStride(); }
+
     SliceIterator() : TBase(0, 1) {}
 
     SliceIterator(const SliceIterator& other)
@@ -245,8 +242,9 @@ public:
     pointer ptr_;
     difference_type offset_;
   private:
-    SliceIterator(pointer ptr, difference_type offset)
-        : TBase(GetExtent(), GetStride())
+    SliceIterator(pointer ptr, difference_type offset,
+                  std::size_t ext, std::ptrdiff_t strd)
+        : TBase(ext, strd)
         , ptr_(ptr), offset_(offset)
     {
     }
@@ -258,19 +256,19 @@ public:
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   iterator begin() {
-    return iterator(data_, 0);
+    return iterator(data_, 0, GetExtent(), GetStride());
   }
 
   iterator end() {
-    return iterator(data_, GetStride() * GetExtent());
+    return iterator(data_, GetStride() * GetExtent(), GetExtent(), GetStride());
   }
 
   const_iterator begin() const {
-    return const_iterator(data_, 0);
+    return const_iterator(data_, 0, GetExtent(), GetStride());
   }
 
   const_iterator end() const {
-    return const_iterator(data_, GetStride() * GetExtent());
+    return const_iterator(data_, GetStride() * GetExtent(), GetExtent(), GetStride());
   }
 
   reverse_iterator rbegin() {
@@ -290,11 +288,11 @@ public:
   }
 
   const_iterator cbegin() const {
-    return const_iterator(data_, 0);
+    return const_iterator(data_, 0, GetExtent(), GetStride());
   }
 
   const_iterator cend() const {
-    return const_iterator(data_, GetStride() * GetExtent());
+    return const_iterator(data_, GetStride() * GetExtent(), GetExtent(), GetStride());
   }
   reference operator[](size_type idx) const {
     return *(data_ + GetStride() * idx);
@@ -495,31 +493,3 @@ Slice(std::array<T, N>&) -> Slice<T, N>;
 template <std::contiguous_iterator Iter>
 Slice(Iter iter, std::size_t count, std::ptrdiff_t skip)
     -> Slice<typename Iter::value_type, std::dynamic_extent, dynamic_stride>;
-
-// int main() {
-//   std::vector<int> a{};
-//   for (size_t i = 0; i < 100; ++i) {
-//     a.push_back(i);
-//   }
-
-//   Slice<int, 15, 2> slice(a);
-//   for (auto&& item : slice) {
-//     std::cout << item << " ";
-//   }
-//   std::cout << std::endl;
-
-//   auto fst = slice.First<5>();
-//   for (auto&& item : fst) {
-//     std::cout << item << " ";
-//   }
-//   std::cout << std::endl;
-
-//   auto fort = fst.Skip<2>();
-//   for (auto&& item : fort) {
-//     std::cout << item << " ";
-//   }
-//   std::cout << std::endl;
-
-//   // slice.SetExtent(2);
-//   return 0;
-// }
