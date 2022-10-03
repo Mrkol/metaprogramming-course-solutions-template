@@ -325,6 +325,17 @@ public:
   {
   }
 
+  template <typename U, std::size_t other_extent, std::ptrdiff_t other_stride>
+  requires ((extent == std::dynamic_extent ||
+             extent == other_extent) && (
+             stride == dynamic_stride ||
+             stride == other_stride))
+  Slice(Slice<U, other_extent, other_stride> other) {
+    SetData(other.data_);
+    SetExtentIfDynamic(other.GetExtent());
+    SetStrideIfDynamic(other.GetStride());
+  }
+
   // // Data, Size, Stride, begin, end, casts, etc...
 
   constexpr difference_type Stride() const noexcept {
