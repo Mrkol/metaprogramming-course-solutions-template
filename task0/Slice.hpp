@@ -320,10 +320,9 @@ public:
 
   template <std::contiguous_iterator It> requires (stride == dynamic_stride)
   Slice(It first, std::size_t count, std::ptrdiff_t skip)
-      : TBase(count, stride)
+      : TBase(count, skip)
       , data_(std::to_address(first))
   {
-    SetStride(skip);
   }
 
   template <typename U, std::size_t other_extent, std::ptrdiff_t other_stride>
@@ -500,7 +499,8 @@ template <typename T, size_t N>
 Slice(std::array<T, N>&) -> Slice<T, N>;
 
 template <std::contiguous_iterator Iter>
-Slice(Iter iter) -> Slice<typename Iter::value_type>;
+Slice(Iter iter, std::size_t count, std::ptrdiff_t skip)
+    -> Slice<typename Iter::value_type, std::dynamic_extent, dynamic_stride>;
 
 // int main() {
 //   std::vector<int> a{};
