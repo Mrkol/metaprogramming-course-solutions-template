@@ -299,7 +299,12 @@ public:
   const_iterator cend() const {
     return const_iterator(data_, GetStride() * GetExtent());
   }
-
+  reference operator[](size_type idx) {
+    return *(data_ + GetStride() * idx);
+  }
+  const_reference operator[](size_t idx) const {
+    return *(data_ + GetStride() * idx);
+  }
   template<BasicContainer U> requires (stride != dynamic_stride)
   constexpr Slice(U& container)
       : data_(container.data())
@@ -321,7 +326,11 @@ public:
   }
 
   constexpr size_type Size() const noexcept {
-    return GetExtent();
+    // return GetExtent();
+    if constexpr (extent == std::dynamic_extent) {
+      return GetExtent();
+    }
+    return extent;
   }
 
   Slice<T, std::dynamic_extent, stride>
@@ -454,6 +463,8 @@ public:
     return *this;
   }
 };
+
+static_assert();
 
 // static_assert(std::random_access_iterator<Slice<int, 2, 3>::iterator>);
 
