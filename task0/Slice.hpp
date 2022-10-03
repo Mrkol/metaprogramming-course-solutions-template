@@ -461,7 +461,7 @@ public:
   }
 
   template <std::ptrdiff_t skip> requires (extent == std::dynamic_extent && stride == dynamic_stride)
-  Slice<T, std::dynamic_extent, stride * skip>
+  Slice<T, std::dynamic_extent, dynamic_stride>
     Skip() const {
     return Slice<T, std::dynamic_extent, dynamic_stride>()
         .SetData(GetData())
