@@ -305,6 +305,12 @@ public:
   const_reference operator[](size_t idx) const {
     return *(data_ + GetStride() * idx);
   }
+  pointer Data() {
+    return GetData();
+  }
+  const_pointer Data() const {
+    return GetData();
+  }
   template<BasicContainer U> requires (stride != dynamic_stride)
   constexpr Slice(U& container)
       : data_(container.data())
