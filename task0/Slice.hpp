@@ -500,7 +500,7 @@ public:
 };
 
 template <BasicContainer Container>
-Slice(Container& container) -> Slice<Container>;
+Slice(Container& container) -> Slice<typename Container::value_type>;
 
 // int main() {
 //   std::vector<int> a{};
