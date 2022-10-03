@@ -412,7 +412,7 @@ public:
   template <std::size_t count>
   Slice<T, std::dynamic_extent, stride>
     DropFirst() const {
-    return Slice<T, extent - count, stride>()
+    return Slice<T, std::dynamic_extent, stride>()
         .SetData(GetData() + count * GetStride())
         .SetExtent(GetExtent() - count)
         .SetStrideIfDynamic(GetStride());
