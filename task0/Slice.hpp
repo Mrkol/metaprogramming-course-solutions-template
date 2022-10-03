@@ -331,7 +331,7 @@ public:
              stride == dynamic_stride ||
              stride == other_stride))
   constexpr  Slice(Slice<U, other_extent, other_stride> other) {
-    SetData(other.data_);
+    SetData(other.Data());
     SetExtentIfDynamic(other.GetExtent());
     SetStrideIfDynamic(other.GetStride());
   }
@@ -495,6 +495,9 @@ Slice(Container&) -> Slice<typename Container::value_type>;
 
 template <typename T, size_t N>
 Slice(std::array<T, N>&) -> Slice<T, N>;
+
+template <std::contiguous_iterator Iter>
+Slice(Iter iter) -> Slice<typename Iter::value_type>;
 
 // int main() {
 //   std::vector<int> a{};
