@@ -213,10 +213,7 @@ public:
     SliceIterator& operator-=(difference_type n) {
       offset_ -= n * GetStride();
     }
-    reference operator[](difference_type n) {
-      return *(ptr_ + offset_ + n * GetStride());
-    }
-    const_reference operator[](difference_type n) const {
+    reference operator[](difference_type n) const {
       return *(ptr_ + offset_ + n * GetStride());
     }
     bool operator==(const SliceIterator& other) const {
