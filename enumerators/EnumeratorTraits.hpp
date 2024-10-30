@@ -1,11 +1,10 @@
 #pragma once
-
+#include <array>
+#include <algorithm>
 #include <type_traits>
 #include <cstdint>
 #include <concepts>
-#include <array>
 #include <string_view>
-#include <algorithm>
 
 const size_t OFFSET = 5;
 
