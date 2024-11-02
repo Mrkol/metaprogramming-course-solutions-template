@@ -16,9 +16,6 @@ class Annotate {};
 using std::tuple;
 
 
-
-
-
 // Object characteristics concept
 
 // Compiles when Struct is non-union class
