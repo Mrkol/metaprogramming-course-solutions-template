@@ -1,12 +1,23 @@
 #pragma once
+#include<string_view>
 
+using std::operator""sv;
+using std::string_view;
 
-template<size_t max_length>
-struct FixedString {
-  FixedString(const char* string, size_t length);
-  operator std::string_view() const;
+template<size_t N>
+struct FixedString
+{
+  char ptr[N]{};
+  size_t len{0};
 
-  // std::string impl; ???
+  constexpr FixedString(const char* s, int sz)
+    : ptr(), len(sz)
+  { std::copy(s, &len[s], ptr); }
+
+  constexpr operator string_view()
+  { return operator""sv(&(ptr[0]), len); }
 };
 
-// operator ""_cstr ?
+constexpr FixedString<256> operator
+""_cstr(const char* s, std::size_t n)
+{ return FixedString<256>(s, n); }
