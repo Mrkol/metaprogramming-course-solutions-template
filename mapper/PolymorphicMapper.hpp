@@ -28,6 +28,9 @@ struct PolymorphicMapper
   , RemainMappings... >
 {
   static std::optional<Target> map(const Base& object) {
+    static_assert(
+      std::is_same_v<std::remove_const_t<decltype(target)>,
+      Target>);
     // Check if it's not From or inheritance of the From typename and if it's not derived
     if (dynamic_cast<const From*>(&object) == nullptr || !std::derived_from<From, Base>) {
       // The check next mapping
