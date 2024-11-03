@@ -4,18 +4,23 @@
 using std::operator""sv;
 using std::string_view;
 
-template<size_t N>
+template<int N>
 struct FixedString
 {
-  char ptr[N]{};
-  size_t len{0};
+  char ptr[N];
+  int len{0};
 
   constexpr FixedString(const char* s, int sz)
-    : ptr(), len(sz)
-  { std::copy(s, &len[s], ptr); }
+    : len(std::min(sz, N))
+  {
+    for (int i = 0; i < sz; ++i) {
+      ptr[i] = s[i];
+    }
+    std::fill(&sz[ptr], &N[ptr], '\0');
+  }
 
-  constexpr operator string_view()
-  { return operator""sv(&(ptr[0]), len); }
+  constexpr operator string_view() const
+  { return std::string_view(ptr, std::size_t(len)); }
 };
 
 constexpr FixedString<256> operator
